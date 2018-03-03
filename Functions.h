@@ -12,13 +12,21 @@ void DebugMode_Msg(String text, char* valoare);
 void DebugMode_Serial();
 void Serial_Control(char value);
 
-void Potentiometer_Servo();
+void Potentiometer_Control();
 void Joystick_LeftRight();
 void Joystick_TopBottom();
 
 void Buttons_Setup();
 void Leds_Setup();
 void Buttons_Press();
+
+void APP_LED_Left(bool status);
+void APP_LED_Right(bool status);
+void APP_LED_Avarii(bool status);
+void APP_LED_Pozitii(bool status);
+void APP_LED_FazaLunga(bool status);
+void APP_MOTOR_Top(bool status);
+void APP_MOTOR_Bottom(bool status);
 //////////////////////////////////////////////////////////////////////
 void DebugMode_Setup(){
   if (DebugMode){
@@ -60,37 +68,55 @@ void DebugMode_Serial(){
   }
 }
 
+
+/** Serial_Control(char value):
+	Send Radio Commands from SERIAL MODE (DebugMode)
+*/
 void Serial_Control(char value){
   // Semnalizare stanga
-  if (value == 'a') Radio_Send((char*)"APP_LED_Lef: {True}");
-  if (value == 'A') Radio_Send((char*)"APP_LED_Lef: {False}");
+  if (value == 'a') APP_LED_Left(true);
+  if (value == 'A') APP_LED_Left(false);
 
   // Semnalizare dreapta
-  if (value == 'b') Radio_Send((char*)"APP_LED_Rig: {True}");
-  if (value == 'B') Radio_Send((char*)"APP_LED_Rig: {False}");
+  if (value == 'b') APP_LED_Right(true);
+  if (value == 'B') APP_LED_Right(false);
 
   // Avarii (Left And Right)
-  if (value == 'c') Radio_Send((char*)"APP_LED_LAR: {True}");
-  if (value == 'C') Radio_Send((char*)"APP_LED_LAR: {False}");
+  if (value == 'c') APP_LED_Avarii(true);
+  if (value == 'C') APP_LED_Avarii(false);
 
   // Pozitii
-  if (value == 'd') Radio_Send((char*)"APP_LED_Pos: {True}");
-  if (value == 'D') Radio_Send((char*)"APP_LED_Pos: {False}");
+  if (value == 'd') APP_LED_Pozitii(true);
+  if (value == 'D') APP_LED_Pozitii(false);
 
   // Faza lunga
-  if (value == 'e') Radio_Send((char*)"APP_LED_Faz: {True}");
-  if (value == 'E') Radio_Send((char*)"APP_LED_Faz: {False}");
+  if (value == 'e') APP_LED_FazaLunga(true);
+  if (value == 'E') APP_LED_FazaLunga(false);
 
   // Gilofar
-  if (value == 'f') Radio_Send((char*)"APP_LED_Gil: {True}");
-  if (value == 'F') Radio_Send((char*)"APP_LED_Gil: {False}");
-
-  if (value == 'g') Radio_Send((char*)"APP_Ser_Top: {512}");
-  if (value == 'G') Radio_Send((char*)"APP_Ser_Top: {0}");
+  // if (value == 'f') Radio_Send((char*)"APP_LED_Gil: {True}");
+  // if (value == 'F') Radio_Send((char*)"APP_LED_Gil: {False}");
   
+  // Control Motor Servo
+  // if (value == 'g') Radio_Send((char*)"APP_Ser_Top: {512}");
+  // if (value == 'G') Radio_Send((char*)"APP_Ser_Top: {0}");
+  
+  // Motor (Top)
+  if (value == 'h') APP_MOTOR_Top(true);
+  if (value == 'H') APP_MOTOR_Top(false);
+  
+  // Motor (Bpttom)
+  if (value == 'i') APP_MOTOR_Bottom(true);
+  if (value == 'I') APP_MOTOR_Bottom(false);
+ 
+
 }
 
-void Potentiometer_Servo(){
+
+/** Potentiometer_Control():
+	Potentiometer Control Rotation
+*/
+void Potentiometer_Control(){
     Val_Potentiometer = analogRead(PIN_Potentiometer);
     if (OLD_Potentiometer <= Val_Potentiometer-3 || OLD_Potentiometer >= Val_Potentiometer+3){
         OLD_Potentiometer = Val_Potentiometer;
@@ -113,6 +139,10 @@ void Potentiometer_Servo(){
     }
 }
 
+
+/** Joystick_LeftRight():
+	Joystick Control LEFT <-> RIGHT
+*/
 void Joystick_LeftRight(){
   Val_Joystick_LeftRight = analogRead(PIN_Joystick_LeftRight);
   if (OLD_Joystick_LeftRight <= Val_Joystick_LeftRight-3 || OLD_Joystick_LeftRight >= Val_Joystick_LeftRight+3){
@@ -120,13 +150,22 @@ void Joystick_LeftRight(){
 
         // Verifica directia de miscare
         String Direction = "Center";
-        if (OLD_Joystick_LeftRight < 510)
+        if (OLD_Joystick_LeftRight < 500){
           Direction = "Right";
-        else if (OLD_Joystick_LeftRight > 520)
+
+          APP_LED_Right(true);
+          
+        }else if (OLD_Joystick_LeftRight > 520){
           Direction = "Left";
-        else
+        
+          APP_LED_Left(true);
+          
+        }else{
           Direction = "Center";
         
+          APP_LED_Left(false);
+          APP_LED_Right(false);
+        }
         // Afiseaza pe ecran valoarea Joystick Left Right
         if (DebugMode){
           LCD_Print("Joystick LeftRight:", (String)OLD_Joystick_LeftRight, Direction, "DebugMode");
@@ -134,6 +173,10 @@ void Joystick_LeftRight(){
   }
 }
 
+
+/** Joystick_TopBottom():
+	Joystick Control TOP <-> BOTTOM
+*/
 void Joystick_TopBottom(){
   Val_Joystick_TopBottom = analogRead(PIN_Joystick_TopBottom);
   if (OLD_Joystick_TopBottom <= Val_Joystick_TopBottom-3 || OLD_Joystick_TopBottom >= Val_Joystick_TopBottom+3){
@@ -141,13 +184,22 @@ void Joystick_TopBottom(){
 
         // Verifica directia de miscare
         String Direction = "Center";
-        if (OLD_Joystick_TopBottom < 510)
+        if (OLD_Joystick_TopBottom < 500){
           Direction = "Bottom";
-        else if (OLD_Joystick_TopBottom > 520)
+
+          APP_MOTOR_Bottom(true);
+          
+      }else if (OLD_Joystick_TopBottom > 520){
           Direction = "Top";
-        else
+
+          APP_MOTOR_Top(true);
+          
+        }else{
           Direction = "Center";
           
+          APP_MOTOR_Top(false);
+          APP_MOTOR_Bottom(false);
+        }
         // Afiseaza pe ecran valoarea Joystick Top Bottom
         if (DebugMode){
           LCD_Print("Joystick TopBottom:", (String)OLD_Joystick_TopBottom, Direction, "DebugMode");
@@ -155,6 +207,10 @@ void Joystick_TopBottom(){
   }
 }
 
+
+/** Buttons_Setup():
+	Buttons Setup PIN MODE
+*/
 void Buttons_Setup(){
   pinMode(PIN_Button_1, INPUT);
   
@@ -167,11 +223,19 @@ void Buttons_Setup(){
   pinMode(PIN_Button_8, INPUT_PULLUP);
 }
 
+
+/** Leds_Setup():
+	LED Setup PIN MODE
+*/
 void Leds_Setup(){
   pinMode(PIN_Led_1, OUTPUT);
   pinMode(PIN_Led_2, OUTPUT);
 }
 
+
+/** Buttons_Press():
+	Verifica daca un buton este apasat si care buton a fost apasat.
+*/
 void Buttons_Press(){
   
   // Joystick Button
@@ -190,6 +254,8 @@ void Buttons_Press(){
   } else {
     digitalWrite(PIN_Led_2, HIGH);
     LCD_Print("Top Bar:", "Button 1", "Pressed", "DebugMode");
+
+    APP_LED_Pozitii(true);
   }
 
   // Top Button 2
@@ -199,6 +265,8 @@ void Buttons_Press(){
   } else {
     digitalWrite(PIN_Led_2, HIGH);
     LCD_Print("Top Bar:", "Button 2", "Pressed", "DebugMode");
+    
+    APP_LED_Pozitii(false);
   }
  
   // Top Button 3
@@ -208,6 +276,8 @@ void Buttons_Press(){
   } else {
     digitalWrite(PIN_Led_2, HIGH);
     LCD_Print("Top Bar:", "Button 3", "Pressed", "DebugMode");
+
+    APP_LED_FazaLunga(true);
   }
   
   // Top Button 4
@@ -217,6 +287,8 @@ void Buttons_Press(){
   } else {
     digitalWrite(PIN_Led_2, HIGH);
     LCD_Print("Top Bar:", "Button 4", "Pressed", "DebugMode");
+
+    APP_LED_FazaLunga(false);
   }
 
   // Right Button 1
@@ -226,6 +298,8 @@ void Buttons_Press(){
   } else {
     digitalWrite(PIN_Led_1, HIGH);
     LCD_Print("Right Bar:", "Button 1", "Pressed", "DebugMode");
+
+    APP_LED_Avarii(true);
   }
   
   // Right Button 2
@@ -235,6 +309,8 @@ void Buttons_Press(){
   } else {
     digitalWrite(PIN_Led_1, HIGH);
     LCD_Print("Right Bar:", "Button 2", "Pressed", "DebugMode");
+
+    APP_LED_Avarii(false);
   }
   
   // Right Button 3
@@ -246,3 +322,80 @@ void Buttons_Press(){
     LCD_Print("Right Bar:", "Button 3", "Pressed", "DebugMode");
   }
 }
+
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* Functii de comunicare intre telecomanda si masina                                                       */
+/*---------------------------------------------------------------------------------------------------------*/
+
+/** Trimite comenzi pentru ON/OFF LED Left */
+void APP_LED_Left(bool status){
+	VAR_LED_Left = status;
+	if (status == true) 
+		Radio_Send((char*)"APP_LED_Lef: {True}");
+	else 
+		Radio_Send((char*)"APP_LED_Lef: {False}");
+}
+
+/** Trimite comenzi pentru ON/OFF LED Right */
+void APP_LED_Right(bool status){
+	VAR_LED_Right = status;
+	if (status == true) 
+		Radio_Send((char*)"APP_LED_Rig: {True}");
+	else 
+		Radio_Send((char*)"APP_LED_Rig: {False}");
+}
+
+/** Trimite comenzi pentru ON/OFF LED Avarii */
+void APP_LED_Avarii(bool status){
+	VAR_LED_Left = false;
+	VAR_LED_Right = false;
+	VAR_LED_Avarii = status;
+	if (status == true) 
+		Radio_Send((char*)"APP_LED_LAR: {True}");
+	else 
+		Radio_Send((char*)"APP_LED_LAR: {False}");
+}
+
+/** Trimite comenzi pentru ON/OFF LED Pozitii */
+void APP_LED_Pozitii(bool status){
+	VAR_LED_Pozitii = status;
+	if (status == true) 
+		Radio_Send((char*)"APP_LED_Pos: {True}");
+	else 
+		Radio_Send((char*)"APP_LED_Pos: {False}");
+}
+
+/** Trimite comenzi pentru ON/OFF LED Avarii */
+void APP_LED_FazaLunga(bool status){
+	VAR_LED_FazaLunga = status;
+	if (status == true) 
+		Radio_Send((char*)"APP_LED_Faz: {True}");
+	else 
+		Radio_Send((char*)"APP_LED_Faz: {False}");
+}
+
+/** Trimite comenzi pentru ON/OFF Motor Top */
+void APP_MOTOR_Top(bool status){
+	VAL_MOTOR_Bottom = false;
+	VAL_MOTOR_Top = status;
+	if (status == true) 
+		Radio_Send((char*)"APP_MOT_TOP: {True}");
+	else 
+		Radio_Send((char*)"APP_MOT_TOP: {False}");
+}
+
+/** Trimite comenzi pentru ON/OFF Motor Bottom */
+void APP_MOTOR_Bottom(bool status){
+	VAL_MOTOR_Top = false;
+	VAL_MOTOR_Bottom = status;
+	if (status == true) 
+		Radio_Send((char*)"APP_MOT_BOT: {True}");
+	else 
+		Radio_Send((char*)"APP_MOT_BOT: {False}");
+}
+
+
+
+
+

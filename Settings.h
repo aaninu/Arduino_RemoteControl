@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 #include "TimedAction.h"
 #include "VirtualWire.h"
 #include <LiquidCrystal.h>
@@ -11,7 +11,7 @@ boolean DebugMode = true;
 int DebugSerialValue = 0;
 
 // Radio
-boolean Radio_Status = false;
+boolean Radio_Status = true;
 int Radio_Speed = 4000;
 int PIN_tx = 10;
 int PIN_rx = 11;
@@ -57,4 +57,23 @@ int ButtonCheck_8 = 0;
 // Leds
 int PIN_Led_1 = 32;
 int PIN_Led_2 = 34;
+
+
+
+/*-----------------------------------------------------------------*/
+/* Statusul comenzilor trimise folosite pentru afisarea pe ecran   */
+/*-----------------------------------------------------------------*/
+
+bool VAR_LED_Left = false;			// LED Left Status 
+bool VAR_LED_Right = false;			// LED Right Status 
+bool VAR_LED_Avarii = false;		// LED Avarii (Cand se activeaza acesta)
+// Aceasta variabila influenteaza cele doua variabile: VAR_LED_Left, VAR_LED_Right
+bool VAR_LED_Pozitii = false;		// LED Pozitii
+bool VAR_LED_FazaLunga = false;		// LED Faza Lunga
+
+bool VAL_MOTOR_Top = false;			// Motor Top
+bool VAL_MOTOR_Bottom = false;		// Motor Bottom
+
+
+
 
