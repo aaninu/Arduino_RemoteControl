@@ -64,3 +64,9 @@ void LCD_Print(String text_1, String text_2, String text_3, String text_4){
     LCD.setCursor(0,3); LCD.print(text_4);
   } 
 }
+
+void LCD_Effect(int iCol, int iRow, String sText){
+	LCD.setCursor(iCol, iRow); 
+	LCD.print(sText);
+}
+

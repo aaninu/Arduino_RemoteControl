@@ -9,6 +9,7 @@ void DebugMode_Setup();
 void DebugMode_Msg(String text);
 void DebugMode_Msg(String text, int valoare);
 void DebugMode_Msg(String text, char* valoare);
+void DebugMode_Msg(String text, String valoare);
 void DebugMode_Serial();
 void Serial_Control(char value);
 
@@ -27,6 +28,9 @@ void APP_LED_Pozitii(bool status);
 void APP_LED_FazaLunga(bool status);
 void APP_MOTOR_Top(bool status);
 void APP_MOTOR_Bottom(bool status);
+
+void Control_Option_Menu();
+void Control_Save_Car();
 //////////////////////////////////////////////////////////////////////
 void DebugMode_Setup(){
   if (DebugMode){
@@ -51,6 +55,15 @@ void DebugMode_Msg(String text, int valoare){
   }
 }
 void DebugMode_Msg(String text, char* valoare){
+  if (DebugMode){
+    Serial.print("[DebugMode]: ");
+    Serial.print(text);
+    Serial.print(" {");
+    Serial.print(valoare);
+    Serial.println("}");
+  }
+}
+void DebugMode_Msg(String text, String valoare){
   if (DebugMode){
     Serial.print("[DebugMode]: ");
     Serial.print(text);
@@ -122,9 +135,7 @@ void Potentiometer_Control(){
         OLD_Potentiometer = Val_Potentiometer;
 
         // Afiseaza pe ecran valoarea potentiometrului
-        if (DebugMode){
-          LCD_Print("Potentiometer:", (String)OLD_Potentiometer, "", "DebugMode");
-        }
+        if (DebugMode_PressButtons) LCD_Print("Potentiometer:", (String)OLD_Potentiometer, "", "DebugMode");
         
         // Trimite comanda catre device
         if (Radio_Status){
@@ -167,9 +178,7 @@ void Joystick_LeftRight(){
           APP_LED_Right(false);
         }
         // Afiseaza pe ecran valoarea Joystick Left Right
-        if (DebugMode){
-          LCD_Print("Joystick LeftRight:", (String)OLD_Joystick_LeftRight, Direction, "DebugMode");
-        }
+        if(DebugMode_PressButtons) LCD_Print("Joystick LeftRight:", (String)OLD_Joystick_LeftRight, Direction, "DebugMode");
   }
 }
 
@@ -189,7 +198,7 @@ void Joystick_TopBottom(){
 
           APP_MOTOR_Bottom(true);
           
-      }else if (OLD_Joystick_TopBottom > 520){
+		}else if (OLD_Joystick_TopBottom > 520){
           Direction = "Top";
 
           APP_MOTOR_Top(true);
@@ -201,9 +210,7 @@ void Joystick_TopBottom(){
           APP_MOTOR_Bottom(false);
         }
         // Afiseaza pe ecran valoarea Joystick Top Bottom
-        if (DebugMode){
-          LCD_Print("Joystick TopBottom:", (String)OLD_Joystick_TopBottom, Direction, "DebugMode");
-        }        
+        if (DebugMode_PressButtons) LCD_Print("Joystick TopBottom:", (String)OLD_Joystick_TopBottom, Direction, "DebugMode");       
   }
 }
 
@@ -233,94 +240,175 @@ void Leds_Setup(){
 }
 
 
-/** Buttons_Press():
-	Verifica daca un buton este apasat si care buton a fost apasat.
-*/
+/** Buttons_Press(): Aceasta face legatura intre User Interface si COD. */
 void Buttons_Press(){
-  
-  // Joystick Button
-  ButtonCheck_1 = digitalRead(PIN_Button_1);
-  if (ButtonCheck_1 == HIGH) {
-    digitalWrite(PIN_Led_2, LOW);
-  } else {
-    digitalWrite(PIN_Led_2, HIGH);
-    LCD_Print("Joystick Button:", "Pressed", "", "DebugMode");
-  }
-
-  // Top Button 1
-  ButtonCheck_2 = digitalRead(PIN_Button_2);
-  if (ButtonCheck_2 == HIGH) {
-    digitalWrite(PIN_Led_2, LOW);
-  } else {
-    digitalWrite(PIN_Led_2, HIGH);
-    LCD_Print("Top Bar:", "Button 1", "Pressed", "DebugMode");
-
-    APP_LED_Pozitii(true);
-  }
-
-  // Top Button 2
-  ButtonCheck_3 = digitalRead(PIN_Button_3);
-  if (ButtonCheck_3 == HIGH) {
-    digitalWrite(PIN_Led_2, LOW);
-  } else {
-    digitalWrite(PIN_Led_2, HIGH);
-    LCD_Print("Top Bar:", "Button 2", "Pressed", "DebugMode");
-    
-    APP_LED_Pozitii(false);
-  }
- 
-  // Top Button 3
-  ButtonCheck_4 = digitalRead(PIN_Button_4);
-  if (ButtonCheck_4 == HIGH) {
-    digitalWrite(PIN_Led_2, LOW);
-  } else {
-    digitalWrite(PIN_Led_2, HIGH);
-    LCD_Print("Top Bar:", "Button 3", "Pressed", "DebugMode");
-
-    APP_LED_FazaLunga(true);
-  }
-  
-  // Top Button 4
-  ButtonCheck_5 = digitalRead(PIN_Button_5);
-  if (ButtonCheck_5 == HIGH) {
-    digitalWrite(PIN_Led_2, LOW);
-  } else {
-    digitalWrite(PIN_Led_2, HIGH);
-    LCD_Print("Top Bar:", "Button 4", "Pressed", "DebugMode");
-
-    APP_LED_FazaLunga(false);
-  }
-
-  // Right Button 1
-  ButtonCheck_6 = digitalRead(PIN_Button_6);
-  if (ButtonCheck_6 == HIGH) {
-    digitalWrite(PIN_Led_1, LOW);
-  } else {
-    digitalWrite(PIN_Led_1, HIGH);
-    LCD_Print("Right Bar:", "Button 1", "Pressed", "DebugMode");
-
-    APP_LED_Avarii(true);
-  }
-  
-  // Right Button 2
-  ButtonCheck_7 = digitalRead(PIN_Button_7);
-  if (ButtonCheck_7 == HIGH) {
-    digitalWrite(PIN_Led_1, LOW);
-  } else {
-    digitalWrite(PIN_Led_1, HIGH);
-    LCD_Print("Right Bar:", "Button 2", "Pressed", "DebugMode");
-
-    APP_LED_Avarii(false);
-  }
-  
-  // Right Button 3
-  ButtonCheck_8 = digitalRead(PIN_Button_8);
-  if (ButtonCheck_8 == HIGH) {
-    digitalWrite(PIN_Led_1, LOW);
-  } else {
-    digitalWrite(PIN_Led_1, HIGH);
-    LCD_Print("Right Bar:", "Button 3", "Pressed", "DebugMode");
-  }
+	// Joystick Button
+	{
+		ButtonCheck_1 = digitalRead(PIN_Button_1);
+		if (ButtonCheck_1 == HIGH) {
+			digitalWrite(PIN_Led_2, LOW);
+			Press_Button_J1_Status = false;
+		} else {
+			digitalWrite(PIN_Led_2, HIGH);
+			if (DebugMode_PressButtons) LCD_Print("Joystick Button:", "Pressed", "", "DebugMode");
+			
+			if (Press_Button_J1_Status == false){
+				Press_Button_J1_Status = true;
+				Control_Option_Menu();
+				Control_Save_Car();
+			}
+		
+		}
+	}
+	
+	// Control Button Top 1
+	{
+		ButtonCheck_2 = digitalRead(PIN_Button_2);
+		if (ButtonCheck_2 == HIGH) {
+			digitalWrite(PIN_Led_2, LOW);
+			Press_Button_T1_Status = false;
+		} else {
+			digitalWrite(PIN_Led_2, HIGH);
+			if (DebugMode_PressButtons) LCD_Print("Top Bar:", "Button 1", "Pressed", "DebugMode");
+			
+			if (Press_Button_T1_Status == false){
+				Press_Button_T1_Status = true;
+				
+				// Show / Hide >> Menu Control
+				if (LCD_Menu_Status == false){
+					LCD_Menu_Status = true;
+					LCD_Menu_Pos = 1;
+					LCD_First_Page = false;
+					LCD_Car_List = false;
+				}else{
+					LCD_Menu_Status = false;
+					LCD_First_Page = true;
+					LCD_Car_List = false;
+				}
+			}
+		}
+	}
+	
+	// Control Button Top 2
+	{
+		ButtonCheck_3 = digitalRead(PIN_Button_3);
+		if (ButtonCheck_3 == HIGH) {
+			digitalWrite(PIN_Led_2, LOW);
+			Press_Button_T2_Status = false;
+		} else {
+			digitalWrite(PIN_Led_2, HIGH);
+			if (DebugMode_PressButtons) LCD_Print("Top Bar:", "Button 2", "Pressed", "DebugMode");
+			
+			if (Press_Button_T2_Status == false){
+				Press_Button_T2_Status = true;
+				
+				// Show / Hide >> Car List
+				if (LCD_Car_List == false){
+					LCD_Car_List = true;
+					LCD_Car_Pos = 1;
+					LCD_First_Page = false;
+					LCD_Menu_Status = false;
+				}else{
+					LCD_Car_List = false;
+					LCD_First_Page = true;
+					LCD_Menu_Status = false;
+				}
+			}
+		}
+	}
+	
+	// Control Button Top 3
+	{
+		ButtonCheck_4 = digitalRead(PIN_Button_4);
+		if (ButtonCheck_4 == HIGH) {
+			digitalWrite(PIN_Led_2, LOW);
+			Press_Button_T3_Status = false;
+		} else {
+			digitalWrite(PIN_Led_2, HIGH);
+			if (DebugMode_PressButtons) LCD_Print("Top Bar:", "Button 3", "Pressed", "DebugMode");
+			
+			if (Press_Button_T3_Status == false){
+				Press_Button_T3_Status = true;
+				// Function HERE
+				
+			}
+		}
+	}
+	
+	// Control Button Top 4
+	{
+		ButtonCheck_5 = digitalRead(PIN_Button_5);
+		if (ButtonCheck_5 == HIGH) {
+			digitalWrite(PIN_Led_2, LOW);
+			Press_Button_T4_Status = false;
+		} else {
+			digitalWrite(PIN_Led_2, HIGH);
+			if (DebugMode_PressButtons) LCD_Print("Top Bar:", "Button 4", "Pressed", "DebugMode");
+			
+			if (Press_Button_T4_Status == false){
+				Press_Button_T4_Status = true;
+				// Function HERE
+				
+			}
+		}
+	}
+	
+	// Control Button Right 1
+	{
+		ButtonCheck_6 = digitalRead(PIN_Button_6);
+		if (ButtonCheck_6 == HIGH) {
+			digitalWrite(PIN_Led_1, LOW);
+			Press_Button_R1_Status = false;
+		} else {
+			digitalWrite(PIN_Led_1, HIGH);
+			if (DebugMode_PressButtons) LCD_Print("Right Bar:", "Button 1", "Pressed", "DebugMode");
+			
+			if (Press_Button_R1_Status == false){
+				Press_Button_R1_Status = true;
+				LCD_Menu_Pos -= 1;
+				if (LCD_Menu_Pos < 1) LCD_Menu_Pos = 1;
+				LCD_Car_Pos -= 1;
+				if (LCD_Car_Pos < 1) LCD_Car_Pos = 1;
+			}
+		}
+	}
+	
+	// Control Right Button 2
+	{
+		ButtonCheck_7 = digitalRead(PIN_Button_7);
+		if (ButtonCheck_7 == HIGH) {
+			digitalWrite(PIN_Led_1, LOW);
+			Press_Button_R2_Status = false;
+		} else {
+			digitalWrite(PIN_Led_1, HIGH);
+			if (DebugMode_PressButtons) LCD_Print("Right Bar:", "Button 2", "Pressed", "DebugMode");
+		
+			if (Press_Button_R2_Status == false){
+				Press_Button_R2_Status = true;
+				LCD_Menu_Pos += 1;
+				if (LCD_Menu_Pos >= GetCarMaxOption()) LCD_Menu_Pos = GetCarMaxOption();
+				LCD_Car_Pos += 1;
+				if (LCD_Car_Pos >= MAX_PAGE_CARS) LCD_Car_Pos = MAX_PAGE_CARS - 1;
+			}
+		}
+	}
+	
+	// Control Button Right 3
+	{
+		ButtonCheck_8 = digitalRead(PIN_Button_8);
+		if (ButtonCheck_8 == HIGH) {
+			digitalWrite(PIN_Led_1, LOW);
+			Press_Button_R3_Status = false;
+		} else {
+			digitalWrite(PIN_Led_1, HIGH);
+			if (DebugMode_PressButtons) LCD_Print("Right Bar:", "Button 3", "Pressed", "DebugMode");
+			
+			if (Press_Button_R3_Status == false){
+				Press_Button_R3_Status = true;
+				// Function HERE
+			}
+		}
+	}
 }
 
 
@@ -397,5 +485,87 @@ void APP_MOTOR_Bottom(bool status){
 
 
 
+// LCD MENU
+void Control_LCD_Menu_Effect(){
+	if (LCD_Menu_Status){
+		if (LCD_Effect_Time == 250){
+			LCD_Effect(0, LCD_Menu_Pos - 1, " ");
+			if (LCD_Menu_Pos < 3) LCD_Effect(0, LCD_Menu_Pos + 1, " ");
+			LCD_Effect(0, LCD_Menu_Pos, ">");
+		}else if (LCD_Effect_Time == 500){
+			LCD_Effect(0, LCD_Menu_Pos - 1, " ");
+			if (LCD_Menu_Pos < 3) LCD_Effect(0, LCD_Menu_Pos + 1, " ");
+			LCD_Effect(0, LCD_Menu_Pos, " ");
+		}else if (LCD_Effect_Time == 750){
+			LCD_Effect_Time = -1;
+		}
+		LCD_Effect_Time += 1;
+	}else{
+		LCD_Menu_Pos = 0;
+		LCD_Effect_Time = 0;
+	}
+}
+void Control_LCD_Menu(){
+	if (LCD_Menu_Status){
+		String Line_1 = " Optiuni:           ";
+		String Line_2 = GetOptionName(PageWithOption[Current_Car_ID][LCD_Menu_Pos][0]);
+		String Line_3 = GetOptionName(PageWithOption[Current_Car_ID][LCD_Menu_Pos][1]);
+		String Line_4 = GetOptionName(PageWithOption[Current_Car_ID][LCD_Menu_Pos][2]);
+		LCD_Print(Line_1, Line_2, Line_3, Line_4);
+	}
+}
+void Control_LCD_First(){
+	if (LCD_First_Page){
+		String Line_1 = GetCarName();
+		LCD_Print(Line_1, "", "", "");
+	}
+}
+void Control_Option_Menu(){
+	if (LCD_Menu_Status){
+		int PosCODid = 2;
+		if (LCD_Menu_Pos == 1) PosCODid = 0;
+		else if (LCD_Menu_Pos == 2) PosCODid = 1;
+		String COD_Option = PageWithOption[Current_Car_ID][LCD_Menu_Pos][PosCODid];
+		String RadioCommand = CarRadioCommand(COD_Option);
 
+		DebugMode_Msg("Control_Option_Menu():", RadioCommand);
+
+	}
+}
+
+
+// LCD Car MENU
+void Control_LCD_CarList_Effect(){
+	if (LCD_Car_List){
+		if (LCD_Car_Time == 250){
+			LCD_Effect(0, LCD_Car_Pos - 1, " ");
+			if (LCD_Car_Pos < 3) LCD_Effect(0, LCD_Car_Pos + 1, " ");
+			LCD_Effect(0, LCD_Car_Pos, ">");
+		}else if (LCD_Car_Time == 500){
+			LCD_Effect(0, LCD_Car_Pos - 1, " ");
+			if (LCD_Car_Pos < 3) LCD_Effect(0, LCD_Car_Pos + 1, " ");
+			LCD_Effect(0, LCD_Car_Pos, " ");
+		}else if (LCD_Car_Time == 750){
+			LCD_Car_Time = -1;
+		}
+		LCD_Car_Time += 1;
+	}else{
+		LCD_Car_Pos = 1;
+		LCD_Car_Time = 0;
+	}
+}
+void Control_LCD_CarList(){
+	if (LCD_Car_List){
+		String Line_1 = " Lista cu masini:   ";
+		LCD_Print(Line_1, PageWithCars[LCD_Car_Pos][0], PageWithCars[LCD_Car_Pos][1], PageWithCars[LCD_Car_Pos][2]);
+	}
+}
+void Control_Save_Car(){
+	if (LCD_Car_List){
+		Current_Car_ID = LCD_Car_Pos-1;
+		CurrentCar = ControlCar[Current_Car_ID][0];
+		LCD_Effect(1, LCD_Car_Pos, ">>>");
+		DebugMode_Msg("Control_Save_Car():", CurrentCar);
+	}
+}
 

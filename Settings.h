@@ -1,4 +1,5 @@
 ////////////////////////////////////////////////////////////////////
+#include "MultiOptions.h"
 #include "TimedAction.h"
 #include "VirtualWire.h"
 #include <LiquidCrystal.h>
@@ -7,7 +8,8 @@
 LiquidCrystal LCD(8,9,4,5,6,7);
 
 // Developer
-boolean DebugMode = true;
+bool DebugMode = true;
+bool DebugMode_PressButtons = false;
 int DebugSerialValue = 0;
 
 // Radio
@@ -19,18 +21,18 @@ int Radio_Test_Value = 0;
 
 // Potentiometer
 int PIN_Potentiometer = 0;
-int OLD_Potentiometer = 0;
-int Val_Potentiometer = 0;
+int OLD_Potentiometer = 10;
+int Val_Potentiometer = 10;
 
-// Joystick LeftRight
+// Joystick Left <-> Right
 int PIN_Joystick_LeftRight = 1;
-int OLD_Joystick_LeftRight = 0;
-int Val_Joystick_LeftRight = 0;
+int OLD_Joystick_LeftRight = 510;
+int Val_Joystick_LeftRight = 510;
 
-// Joystick TopBottom
+// Joystick Top <-> Bottom
 int PIN_Joystick_TopBottom = 2;
-int OLD_Joystick_TopBottom = 0;
-int Val_Joystick_TopBottom = 0;
+int OLD_Joystick_TopBottom = 510;
+int Val_Joystick_TopBottom = 510;
 
 // Buttons
 int PIN_Button_1 = 22;    // Joystick
@@ -58,6 +60,17 @@ int ButtonCheck_8 = 0;
 int PIN_Led_1 = 32;
 int PIN_Led_2 = 34;
 
+// Check One Press On BUTTON
+bool Press_Button_J1_Status = false;
+
+bool Press_Button_T1_Status = false;
+bool Press_Button_T2_Status = false;
+bool Press_Button_T3_Status = false;
+bool Press_Button_T4_Status = false;
+
+bool Press_Button_R1_Status = false;
+bool Press_Button_R2_Status = false;
+bool Press_Button_R3_Status = false;
 
 
 /*-----------------------------------------------------------------*/
@@ -75,5 +88,18 @@ bool VAL_MOTOR_Top = false;			// Motor Top
 bool VAL_MOTOR_Bottom = false;		// Motor Bottom
 
 
+
+// LCD Menu
+int LCD_Effect_Time = 0;
+bool LCD_Menu_Status = false;
+int LCD_Menu_Pos = 1;
+
+// LCD First PAGE
+bool LCD_First_Page = true;
+
+// LCD List of Cars
+bool LCD_Car_List = false;
+int LCD_Car_Time = 0;
+int LCD_Car_Pos = 1;
 
 
