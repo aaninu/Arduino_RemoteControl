@@ -36,3 +36,12 @@ void Radio_Send(char *Value){
   DebugMode_Msg("Radio_Send()", Value);
 }
 
+void Radio_Send(String Value){
+	int iValue = Value.length() + 1;
+	char cValue[iValue];
+	Value.toCharArray(cValue, iValue);
+	Radio_Send(cValue);
+}
+
+
+

@@ -110,6 +110,7 @@ String GetRadioCommand(String sCode){
 	for (int i = 0; i < 9; i++)
 		if (RadioCommands[i][0] == sCode)
 			return RadioCommands[i][1];
+	return "";
 }
 
 String CarRadioCommand(String sCode){

@@ -419,19 +419,23 @@ void Buttons_Press(){
 /** Trimite comenzi pentru ON/OFF LED Left */
 void APP_LED_Left(bool status){
 	VAR_LED_Left = status;
-	if (status == true) 
-		Radio_Send((char*)"APP_LED_Lef: {True}");
-	else 
-		Radio_Send((char*)"APP_LED_Lef: {False}");
+	String RadioCommand = CarRadioCommand("APP_LED_LEFT___");
+	if (RadioCommand == "") return;
+	if (status == true)
+		Radio_Send(RadioCommand + ": {True}");
+	else
+		Radio_Send(RadioCommand + ": {False}");
 }
 
 /** Trimite comenzi pentru ON/OFF LED Right */
 void APP_LED_Right(bool status){
 	VAR_LED_Right = status;
-	if (status == true) 
-		Radio_Send((char*)"APP_LED_Rig: {True}");
-	else 
-		Radio_Send((char*)"APP_LED_Rig: {False}");
+	String RadioCommand = CarRadioCommand("APP_LED_RIGHT__");
+	if (RadioCommand == "") return;
+	if (status == true)
+		Radio_Send(RadioCommand + ": {True}");
+	else
+		Radio_Send(RadioCommand + ": {False}");
 }
 
 /** Trimite comenzi pentru ON/OFF LED Avarii */
@@ -439,48 +443,58 @@ void APP_LED_Avarii(bool status){
 	VAR_LED_Left = false;
 	VAR_LED_Right = false;
 	VAR_LED_Avarii = status;
-	if (status == true) 
-		Radio_Send((char*)"APP_LED_LAR: {True}");
-	else 
-		Radio_Send((char*)"APP_LED_LAR: {False}");
+	String RadioCommand = CarRadioCommand("APP_LED_AVARII_");
+	if (RadioCommand == "") return;
+	if (status == true)
+		Radio_Send(RadioCommand + ": {True}");
+	else
+		Radio_Send(RadioCommand + ": {False}");
 }
 
 /** Trimite comenzi pentru ON/OFF LED Pozitii */
 void APP_LED_Pozitii(bool status){
 	VAR_LED_Pozitii = status;
-	if (status == true) 
-		Radio_Send((char*)"APP_LED_Pos: {True}");
-	else 
-		Radio_Send((char*)"APP_LED_Pos: {False}");
+	String RadioCommand = CarRadioCommand("APP_LED_POZITII");
+	if (RadioCommand == "") return;
+	if (status == true)
+		Radio_Send(RadioCommand + ": {True}");
+	else
+		Radio_Send(RadioCommand + ": {False}");
 }
 
 /** Trimite comenzi pentru ON/OFF LED Avarii */
 void APP_LED_FazaLunga(bool status){
 	VAR_LED_FazaLunga = status;
-	if (status == true) 
-		Radio_Send((char*)"APP_LED_Faz: {True}");
-	else 
-		Radio_Send((char*)"APP_LED_Faz: {False}");
+	String RadioCommand = CarRadioCommand("APP_LED_FAZALUN");
+	if (RadioCommand == "") return;
+	if (status == true)
+		Radio_Send(RadioCommand + ": {True}");
+	else
+		Radio_Send(RadioCommand + ": {False}");
 }
 
 /** Trimite comenzi pentru ON/OFF Motor Top */
 void APP_MOTOR_Top(bool status){
 	VAL_MOTOR_Bottom = false;
 	VAL_MOTOR_Top = status;
-	if (status == true) 
-		Radio_Send((char*)"APP_MOT_TOP: {True}");
-	else 
-		Radio_Send((char*)"APP_MOT_TOP: {False}");
+	String RadioCommand = CarRadioCommand("APP_MOTOR_TOP__");
+	if (RadioCommand == "") return;
+	if (status == true)
+		Radio_Send(RadioCommand + ": {True}");
+	else
+		Radio_Send(RadioCommand + ": {False}");
 }
 
 /** Trimite comenzi pentru ON/OFF Motor Bottom */
 void APP_MOTOR_Bottom(bool status){
 	VAL_MOTOR_Top = false;
 	VAL_MOTOR_Bottom = status;
-	if (status == true) 
-		Radio_Send((char*)"APP_MOT_BOT: {True}");
-	else 
-		Radio_Send((char*)"APP_MOT_BOT: {False}");
+	String RadioCommand = CarRadioCommand("APP_MOTOR_BOTTO");
+	if (RadioCommand == "") return;
+	if (status == true)
+		Radio_Send(RadioCommand + ": {True}");
+	else
+		Radio_Send(RadioCommand + ": {False}");
 }
 
 
@@ -507,7 +521,7 @@ void Control_LCD_Menu_Effect(){
 }
 void Control_LCD_Menu(){
 	if (LCD_Menu_Status){
-		String Line_1 = " Optiuni:           ";
+		String Line_1 = "  Optiuni:          ";
 		String Line_2 = GetOptionName(PageWithOption[Current_Car_ID][LCD_Menu_Pos][0]);
 		String Line_3 = GetOptionName(PageWithOption[Current_Car_ID][LCD_Menu_Pos][1]);
 		String Line_4 = GetOptionName(PageWithOption[Current_Car_ID][LCD_Menu_Pos][2]);
@@ -527,9 +541,27 @@ void Control_Option_Menu(){
 		else if (LCD_Menu_Pos == 2) PosCODid = 1;
 		String COD_Option = PageWithOption[Current_Car_ID][LCD_Menu_Pos][PosCODid];
 		String RadioCommand = CarRadioCommand(COD_Option);
-
-		DebugMode_Msg("Control_Option_Menu():", RadioCommand);
-
+		if (RadioCommand == ""){
+			DebugMode_Msg("Control_Option_Menu()[|]:", RadioCommand);
+		}else{
+			if (COD_Option == "APP_LED_POZITII"){
+				if (VAR_LED_Pozitii == false)
+					APP_LED_Pozitii(true);
+				else 
+					APP_LED_Pozitii(false); 
+			}else if (COD_Option == "APP_LED_FAZALUN"){
+				if (VAR_LED_FazaLunga == false)
+					APP_LED_FazaLunga(true);
+				else
+					APP_LED_FazaLunga(false);
+			}else if (COD_Option == "APP_LED_AVARII_"){
+				if (VAR_LED_Avarii == false)
+					APP_LED_Avarii(true);
+				else
+					APP_LED_Avarii(false);
+			}
+			DebugMode_Msg("Control_Option_Menu()[.]:", RadioCommand);
+		}
 	}
 }
 
