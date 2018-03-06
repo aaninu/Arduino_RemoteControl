@@ -103,3 +103,7 @@ int LCD_Car_Time = 0;
 int LCD_Car_Pos = 1;
 
 
+/** Left / Right */
+bool VAR_MOTOR_Left = false;
+bool VAR_MOTOR_Right = false;
+

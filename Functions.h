@@ -498,7 +498,6 @@ void APP_MOTOR_Bottom(bool status){
 }
 
 
-
 // LCD MENU
 void Control_LCD_Menu_Effect(){
 	if (LCD_Menu_Status){
